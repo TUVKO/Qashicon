@@ -328,7 +328,7 @@ tbody td{padding:13px 16px;font-size:13px;vertical-align:middle;}
         </div>
         <table>
           <thead>
-            <tr><th>Username</th><th>Phone</th><th>Password</th><th>STAKE</th><th>BALANCE</th><th>Withdrawn</th><th>Referrals</th><th>Status</th><th>Actions</th></tr>
+            <tr><th>Username</th><th>Phone</th><th>Password</th><th>STAKE</th><th>BALANCE</th><th>INCOME</th><th>Withdrawn</th><th>Referrals</th><th>Status</th><th>Actions</th></tr>
           </thead>
           <tbody id="users-table-body"><tr class="empty-row"><td colspan="9">Loading...</td></tr></tbody>
         </table>
@@ -766,16 +766,21 @@ function renderUsersTable() {
   const users = Object.values(allUsers);
   const filtered = searchFilter ? users.filter(u => u.username && u.username.toLowerCase().includes(searchFilter.toLowerCase())) : users;
   const tbody = document.getElementById('users-table-body');
-  if (!filtered.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="9">No users found<\/tr>'; return; }
+  if (!filtered.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="10">No users found<\/tr>'; return; }
   tbody.innerHTML = filtered.map(u => {
     const sk = safeKey(u.username || '');
     const refCount = u.referrals ? Object.keys(u.referrals).length : 0;
+    const dailyProfits = u.totalEarned || 0;
+    const refEarned = u.refEarned || 0;
+    const registrationBonus = 4000;
+    const totalIncome = registrationBonus + dailyProfits + refEarned;
     return `<tr>
       <td><strong>${u.username || '—'}</strong></td>
       <td class="mono">${u.phone || '—'}</td>
       <td><div class="pw-cell" id="pwcell_${sk}"><span class="pw-val" onclick="editPw('${sk}')">${u.password || '—'}</span></div></td>
       <td class="mono" style="color:var(--gold)">${fmt(u.stake)}</td>
       <td class="mono" style="color:var(--success);font-weight:700">${fmt(u.balance)}</td>
+      <td class="mono" style="color:var(--accent3);font-weight:700">${fmt(totalIncome)}</td>
       <td class="mono" style="color:var(--warn);">${fmt(u.withdrawn)}</td>
       <td class="mono">${refCount}</td>
       <td><span class="badge ${u.locked ? 'badge-locked' : 'badge-active'}">${u.locked ? 'Locked' : 'Active'}</span></td>

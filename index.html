@@ -1288,10 +1288,13 @@ function updateBalanceUI() {
   const stake = currentUser.stake || 0;
   const balance = currentUser.balance || 0;
   const withdrawn = currentUser.withdrawn || 0;
-  const totalEarned = currentUser.totalEarned || 0;
+  const dailyProfits = currentUser.totalEarned || 0;
+  const refEarned = currentUser.refEarned || 0;
+  const registrationBonus = 4000;
+  const totalIncome = registrationBonus + dailyProfits + refEarned;
   document.getElementById('stat-stake').textContent = fmt(stake);
   document.getElementById('stat-balance').textContent = fmt(balance);
-  document.getElementById('stat-income').textContent = fmt(totalEarned);
+  document.getElementById('stat-income').textContent = fmt(totalIncome);
   document.getElementById('stat-withdrawn').textContent = fmt(withdrawn);
   document.getElementById('reinvest-balance-display').textContent = fmt(balance);
   updateActiveInvestmentDisplay();
