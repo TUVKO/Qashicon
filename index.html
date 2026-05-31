@@ -625,7 +625,7 @@ input[type="password"]{padding-right:46px;}
 
   <!-- Returns Plan -->
   <div class="dash-section" id="sec-plan">
-    <div class="inner-header"><span style="font-size:22px">🎯</span><div><div class="inner-title">Yield</div><div class="inner-sub">10% daily for 56 days (560% total)</div></div></div>
+    <div class="inner-header"><span style="font-size:22px">🎯</span><div><div class="inner-title">Yield</div><div class="inner-sub" id="yield-subtitle">10% daily for 48 days (480% total)</div></div></div>
     <div class="section">
       <div class="plan-wrap">
         <div class="plan-header"><div class="plan-header-title" id="plan-header-title">📈 Qash-Icon Growth Plan — 10% Daily × 48 Days = 480% Total Return</div></div>
@@ -1256,6 +1256,12 @@ function updateUIWithSettings() {
 function updatePlanTable() {
   const earningPeriod = (settingsData && settingsData.earningPeriod) || 48;
   const totalReturn = earningPeriod * 10;
+  
+  // Update Yield subtitle
+  const yieldSubtitle = document.getElementById('yield-subtitle');
+  if (yieldSubtitle) {
+    yieldSubtitle.textContent = `10% daily for ${earningPeriod} days (${totalReturn}% total)`;
+  }
   
   // Update header
   const headerEl = document.getElementById('plan-header-title');
