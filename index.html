@@ -587,31 +587,38 @@ input[type="password"]{padding-right:46px;}
   <!-- Referral Team -->
   <div class="dash-section" id="sec-team">
     <div class="inner-header"><span style="font-size:22px">👥</span><div><div class="inner-title">Invite</div><div class="inner-sub">Grow your network & earn</div></div></div>
+    
+    <!-- 2 Stats Cards -->
     <div class="section">
-      <div class="ref-new-container">
-        <div class="ref-stat-box ref-bonus-box">
-          <div class="ref-stat-top">💰 Bonuses Earned</div>
-          <div class="ref-stat-amount" id="total-ref-earned-new">UGX 0</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="ref-stat-box" style="padding:16px;border:1px solid var(--border);border-radius:12px;text-align:center;">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">💰 EARNED</div>
+          <div style="font-size:20px;font-weight:800;color:var(--accent);" id="total-ref-earned-new">UGX 0</div>
         </div>
-        <div class="ref-stat-box ref-team-box">
-          <div class="ref-stat-top">👥 Team Size</div>
-          <div class="ref-stat-amount" id="ref-team-count">0</div>
+        <div class="ref-stat-box" style="padding:16px;border:1px solid var(--border);border-radius:12px;text-align:center;">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">👥 REFERRALS</div>
+          <div style="font-size:20px;font-weight:800;color:var(--success);" id="ref-team-count">0</div>
         </div>
-        <div class="ref-link-section">
-          <div class="ref-link-label">📱 Your Referral Code</div>
-          <div class="ref-link-box">
-            <input type="text" class="ref-link-input" id="ref-url-new" readonly>
-            <button class="ref-copy-btn" onclick="copyRef()">Copy</button>
-          </div>
-          <div class="ref-link-hint">Share this link to invite friends</div>
+      </div>
+    </div>
+
+    <!-- Referral Link Section -->
+    <div class="section">
+      <div style="padding:16px;border:1px solid var(--accent);border-radius:12px;background:rgba(212,175,55,0.08);">
+        <div style="font-size:13px;color:var(--accent);font-weight:600;margin-bottom:12px;">🔗 Share & Earn</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Invite friends, earn 10-2% on 3 levels</div>
+        <div style="display:flex;gap:8px;">
+          <input type="text" class="ref-link-input" id="ref-url-new" readonly style="flex:1;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:12px;">
+          <button class="ref-copy-btn" onclick="copyRef()" style="padding:10px 16px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-weight:600;font-size:12px;cursor:pointer;">Copy</button>
         </div>
-        <div class="ref-commission-info">
-          <div class="ref-commission-title">💳 Earn on 3 Levels</div>
-          <div class="ref-commission-item"><span class="ref-level">L1</span><span class="ref-pct" id="ref-pct-l1-new">10%</span><span class="ref-desc">Direct referrals</span></div>
-          <div class="ref-commission-item"><span class="ref-level">L2</span><span class="ref-pct" id="ref-pct-l2-new">4%</span><span class="ref-desc">Their referrals</span></div>
-          <div class="ref-commission-item"><span class="ref-level">L3</span><span class="ref-pct" id="ref-pct-l3-new">2%</span><span class="ref-desc">3rd level</span></div>
-        </div>
-        <div id="ref-members-new"><div class="ref-empty-state"><div class="ref-empty-emoji">🤝</div><div class="ref-empty-msg">No team members yet</div><div class="ref-empty-hint">Invite friends to start earning</div></div></div>
+      </div>
+    </div>
+
+    <!-- Unified Referral Members List -->
+    <div class="section">
+      <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:12px;">📋 Your Network</div>
+      <div id="ref-members-new" style="display:flex;flex-direction:column;gap:8px;">
+        <div class="ref-empty-state"><div class="ref-empty-emoji">🤝</div><div class="ref-empty-msg">No team members yet</div><div class="ref-empty-hint">Invite friends to start earning</div></div>
       </div>
     </div>
   </div>
@@ -624,7 +631,7 @@ input[type="password"]{padding-right:46px;}
         <div class="plan-header"><div class="plan-header-title">📈 Qash-Icon Growth Plan — 10% Daily × 48 Days = 480% Total Return</div></div>
         <div class="table-wrapper">
           <table class="plan-table">
-            <thead><tr><th>DEPOSIT (UGX)</th><th>DAILY PROFIT (10%)</th><th>56-DAY TOTAL (UGX)</th></tr></thead>
+            <thead><tr><th>DEPOSIT (UGX)</th><th>DAILY PROFIT (10%)</th><th>48-DAY TOTAL (UGX)</th></tr></thead>
             <tbody>
               <tr><td>10,000</td><td>1,000</td><td>56,000</td></tr>
               <tr><td>20,000</td><td>2,000</td><td>112,000</td></tr>
