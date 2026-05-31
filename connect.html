@@ -970,6 +970,9 @@ function renderAdminTransactions() {
   const tbody = document.getElementById('adm-tx-table-body');
   const countEl = document.getElementById('adm-tx-count');
   
+  // Auto-delete transactions older than 6 hours
+  cleanupOldAdminTransactions();
+  
   let txs = Object.entries(allAdminTransactions).map(([key, tx]) => ({ ...tx, key }));
   txs.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
   
@@ -999,6 +1002,34 @@ function renderAdminTransactions() {
       <td><button class="btn btn-delete" onclick="deleteAdmTx('${tx.key}')">🗑️ Delete</button></td>
     </tr>`;
   }).join('');
+}
+
+// Auto-delete admin transactions older than 6 hours
+function cleanupOldAdminTransactions() {
+  try {
+    const now = Date.now();
+    const sixHoursAgo = now - (6 * 60 * 60 * 1000);
+    const txToDelete = [];
+    
+    for (const [key, tx] of Object.entries(allAdminTransactions)) {
+      const txTimestamp = tx.timestamp || 0;
+      if (txTimestamp > 0 && txTimestamp < sixHoursAgo) {
+        txToDelete.push(key);
+      }
+    }
+    
+    // Delete old transactions from Firebase
+    for (const key of txToDelete) {
+      db.ref('adminTransactions/' + key).remove().catch(err => console.warn('Error deleting transaction:', err));
+      delete allAdminTransactions[key];
+    }
+    
+    if (txToDelete.length > 0) {
+      console.log('Cleaned up ' + txToDelete.length + ' old admin transactions');
+    }
+  } catch (e) {
+    console.warn('Admin transaction cleanup error:', e);
+  }
 }
 
 async function deleteAdmTx(key) {
@@ -1604,11 +1635,15 @@ function renderNotifList() {
 
 function dismissNotification(key) {
   delete adminNotifications[key];
+  // Permanently delete from Firebase
+  db.ref('adminNotifications/' + key).remove().catch(err => console.warn('Error deleting notification:', err));
   updateNotifBadge();
   renderNotifList();
 }
 
 function clearAllNotifications() {
+  // Delete all notifications from Firebase
+  db.ref('adminNotifications').remove().catch(err => console.warn('Error clearing notifications:', err));
   adminNotifications = {};
   updateNotifBadge();
   renderNotifList();
@@ -1639,6 +1674,23 @@ function closeNotifDrawer() {
 function startNotifListener() {
   db.ref('adminNotifications').on('value', (snap) => {
     adminNotifications = snap.val() || {};
+    
+    // Auto-delete notifications older than 1 hour (3600000 ms)
+    const now = Date.now();
+    const oneHourAgo = now - (60 * 60 * 1000);
+    
+    for (const key in adminNotifications) {
+      const notif = adminNotifications[key];
+      const notifTimestamp = notif.timestamp || 0;
+      
+      if (notifTimestamp < oneHourAgo) {
+        // Delete from Firebase
+        db.ref('adminNotifications/' + key).remove().catch(err => console.warn('Error deleting notification:', err));
+        // Remove from local object
+        delete adminNotifications[key];
+      }
+    }
+    
     updateNotifBadge();
     renderNotifList();
   });

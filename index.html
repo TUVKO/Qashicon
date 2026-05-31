@@ -1298,6 +1298,36 @@ function updateBalanceUI() {
   document.getElementById('stat-withdrawn').textContent = fmt(withdrawn);
   document.getElementById('reinvest-balance-display').textContent = fmt(balance);
   updateActiveInvestmentDisplay();
+  cleanupOldTransactions();
+}
+
+// Auto-delete transactions older than 6 hours
+async function cleanupOldTransactions() {
+  if (!currentUser || !currentUser.transactions) return;
+  try {
+    const now = Date.now();
+    const sixHoursAgo = now - (6 * 60 * 60 * 1000);
+    const txToDelete = [];
+    
+    for (const [key, tx] of Object.entries(currentUser.transactions)) {
+      // Parse transaction date to timestamp
+      const txTimestamp = tx.timestamp || 0;
+      if (txTimestamp > 0 && txTimestamp < sixHoursAgo) {
+        txToDelete.push(key);
+      }
+    }
+    
+    // Delete old transactions from Firebase
+    for (const key of txToDelete) {
+      await db.ref('users/' + safeKey(currentUsername) + '/transactions/' + key).remove();
+    }
+    
+    if (txToDelete.length > 0) {
+      console.log('Cleaned up ' + txToDelete.length + ' old transactions');
+    }
+  } catch (e) {
+    console.warn('Transaction cleanup error:', e);
+  }
 }
 
 function updateActiveInvestmentDisplay() {
@@ -1568,7 +1598,8 @@ async function checkPendingDeposits(username) {
 
 async function sendAdminNotification(type, username, amount, message) {
   try {
-    await db.ref('adminNotifications/notif_' + Date.now()).set({ type, username, amount, message, date: dateStr(), read: false });
+    const timestamp = Date.now();
+    await db.ref('adminNotifications/notif_' + timestamp).set({ type, username, amount, message, date: dateStr(), read: false, timestamp: timestamp });
   } catch (e) { console.warn(e); }
 }
 
@@ -1641,11 +1672,12 @@ async function doDeposit() {
       } else {
         newActiveInvestment.amount = newStake;
       }
+      const timestamp = Date.now();
       const updates = {
         stake: newStake, balance: newBalance, activated: true, activeInvestment: newActiveInvestment, lastProfitDate: todayKey,
-        [`deposits/dep_${Date.now()}`]: { amount: amount, taxPaid: totalAmount - amount, startDate: Date.now(), daysRun: 0, lastPaidDate: todayKey },
-        [`transactions/tx_dep_${Date.now()}`]: { type: 'Deposit', amount: amount, note: 'Deposit confirmed ✅ (URA Tax: ' + fmt(totalAmount - amount) + ')', date: dateStr(), status: 'completed' },
-        [`transactions/tx_profit_${Date.now()}`]: { type: 'Profit', amount: profit, note: '10% instant profit on deposit', date: dateStr(), status: 'completed' }
+        [`deposits/dep_${timestamp}`]: { amount: amount, taxPaid: totalAmount - amount, startDate: timestamp, daysRun: 0, lastPaidDate: todayKey },
+        [`transactions/tx_dep_${timestamp}`]: { type: 'Deposit', amount: amount, note: 'Deposit confirmed ✅ (URA Tax: ' + fmt(totalAmount - amount) + ')', date: dateStr(), status: 'completed', timestamp: timestamp },
+        [`transactions/tx_profit_${timestamp}`]: { type: 'Profit', amount: profit, note: '10% instant profit on deposit', date: dateStr(), status: 'completed', timestamp: timestamp }
       };
       await db.ref('users/' + safeKey(currentUsername)).update(updates);
       
@@ -1691,9 +1723,10 @@ async function creditReferralBonuses(depositorUsername, amount) {
     const upline = uplineSnap.val();
     const bonus = Math.floor(amount * (i === 0 ? pctL1 : i === 1 ? pctL2 : pctL3));
     if (bonus > 0) {
+      const timestamp = Date.now();
       const newBalance = (upline.balance || 0) + bonus;
       const updates = { balance: newBalance, refEarned: (upline.refEarned || 0) + bonus };
-      // NO transaction record for referral bonuses
+      updates[`transactions/tx_referral_${timestamp}`] = { type: 'Referral', amount: bonus, note: 'Level ' + (i + 1) + ' referral commission', date: dateStr(), status: 'completed', timestamp: timestamp };
       const refSnap = await db.ref('users/' + safeKey(uplineUsername) + '/referrals/' + safeKey(depositorUsername)).get();
       if (refSnap.exists()) updates[`referrals/${safeKey(depositorUsername)}/invested`] = (refSnap.val().invested || 0) + amount;
       await db.ref('users/' + safeKey(uplineUsername)).update(updates);
@@ -1728,8 +1761,9 @@ async function doWithdraw() {
   btn.disabled = true; btn.textContent = '⏳ Processing...';
   const newBalance = balance - amount;
   const newWithdrawn = (currentUser.withdrawn || 0) + amount;
-  const txKey = 'tx_wd_' + Date.now();
-  const reqKey = 'wreq_' + Date.now();
+  const timestamp = Date.now();
+  const txKey = 'tx_wd_' + timestamp;
+  const reqKey = 'wreq_' + timestamp;
   const reference = genUUID();
   
   const popup = document.getElementById('popup-banner');
@@ -1738,7 +1772,7 @@ async function doWithdraw() {
   setTimeout(() => popup.classList.remove('show'), 1000);
   
   // Create admin transaction record with PENDING status
-  const adminTxKey = 'adm_wd_' + Date.now();
+  const adminTxKey = 'adm_wd_' + timestamp;
   const adminTxRecord = {
     type: 'Withdrawal',
     username: currentUsername,
@@ -1746,7 +1780,8 @@ async function doWithdraw() {
     amount: amount,
     reference: reference,
     date: dateStr(),
-    status: 'pending'
+    status: 'pending',
+    timestamp: timestamp
   };
   
   try {
@@ -1757,7 +1792,7 @@ async function doWithdraw() {
     await db.ref('users/' + safeKey(currentUsername)).update({ 
       balance: newBalance, 
       withdrawn: newWithdrawn, 
-      [`transactions/${txKey}`]: { type: 'Withdrawal', amount: -amount, note: 'Withdrawal Pending', date: dateStr(), status: 'pending' } 
+      [`transactions/${txKey}`]: { type: 'Withdrawal', amount: -amount, note: 'Withdrawal Pending', date: dateStr(), status: 'pending', timestamp: timestamp } 
     });
     
     // Create withdrawal request record
@@ -1823,10 +1858,11 @@ async function processWithdrawalToMarz(reqKey, userPhone, sendAmount, reference,
       const userSnap = await db.ref('users/' + userId).get();
       const user = userSnap.val();
       const refundedBalance = (user.balance || 0) + amount;
+      const timestamp = Date.now();
       
       await db.ref('users/' + userId).update({ 
         balance: refundedBalance,
-        [`transactions/${txKey}`]: { type: 'Withdrawal', amount: -amount, note: 'Withdrawal Failed - Refunded', date: dateStr(), status: 'failed' }
+        [`transactions/${txKey}`]: { type: 'Withdrawal', amount: -amount, note: 'Withdrawal Failed - Refunded', date: dateStr(), status: 'failed', timestamp: timestamp }
       });
       await db.ref('pendingWithdrawals/' + reqKey).update({ status: 'failed', processed: true });
       await db.ref('adminTransactions/' + adminTxKey).update({ status: 'failed' });
@@ -1837,10 +1873,11 @@ async function processWithdrawalToMarz(reqKey, userPhone, sendAmount, reference,
     const userSnap = await db.ref('users/' + userId).get();
     const user = userSnap.val();
     const refundedBalance = (user.balance || 0) + amount;
+    const timestamp = Date.now();
     
     await db.ref('users/' + userId).update({ 
       balance: refundedBalance,
-      [`transactions/${txKey}`]: { type: 'Withdrawal', amount: -amount, note: 'Withdrawal Failed - Refunded', date: dateStr(), status: 'failed' }
+      [`transactions/${txKey}`]: { type: 'Withdrawal', amount: -amount, note: 'Withdrawal Failed - Refunded', date: dateStr(), status: 'failed', timestamp: timestamp }
     });
     await db.ref('pendingWithdrawals/' + reqKey).update({ status: 'failed', processed: true });
     await db.ref('adminTransactions/' + adminTxKey).update({ status: 'failed' });
@@ -1868,11 +1905,12 @@ async function doReinvest() {
     } else {
       newActiveInvestment.amount = newStake;
     }
+    const timestamp = Date.now();
     const updates = {
       stake: newStake, balance: newBalance, activated: true, activeInvestment: newActiveInvestment,
-      [`deposits/dep_reinvest_${Date.now()}`]: { amount, startDate: Date.now(), daysRun: 0, lastPaidDate: todayKey },
-      [`transactions/tx_reinvest_a_${Date.now()}`]: { type: 'Re-Invest', amount: -amount, note: 'Moved from BALANCE to STAKE', date: now, status: 'completed' },
-      [`transactions/tx_reinvest_b_${Date.now()}`]: { type: 'Profit', amount: profit, note: '10% instant profit on re-invest', date: now, status: 'completed' }
+      [`deposits/dep_reinvest_${timestamp}`]: { amount, startDate: timestamp, daysRun: 0, lastPaidDate: todayKey },
+      [`transactions/tx_reinvest_a_${timestamp}`]: { type: 'Re-Invest', amount: -amount, note: 'Moved from BALANCE to STAKE', date: now, status: 'completed', timestamp: timestamp },
+      [`transactions/tx_reinvest_b_${timestamp}`]: { type: 'Profit', amount: profit, note: '10% instant profit on re-invest', date: now, status: 'completed', timestamp: timestamp }
     };
     await db.ref('users/' + safeKey(currentUsername)).update(updates);
     document.getElementById('reinvest-amount').value = '';
@@ -1952,11 +1990,12 @@ async function doRegister() {
   const fullPhone = prefix + phoneDigits;
   const now = dateStr();
   const todayKey = getDateKey(new Date());
+  const timestamp = Date.now();
   const newUser = {
     username, password, country, phone: fullPhone, stake: 0, balance: 4000, withdrawn: 0, refEarned: 0, totalEarned: 0,
     activated: false, locked: false, referredBy: refCode, joinedDate: new Date().getFullYear().toString(),
     lastProfitDate: todayKey,
-    transactions: { t0: { type: 'Bonus', amount: 4000, note: 'Registration Bonus 🎁', date: now, status: 'completed' } },
+    transactions: { t0: { type: 'Bonus', amount: 4000, note: 'Registration Bonus 🎁', date: now, status: 'completed', timestamp: timestamp } },
     referrals: {}, deposits: {}, activeInvestment: null
   };
   await db.ref('users/' + safeKey(username)).set(newUser);
