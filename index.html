@@ -483,7 +483,7 @@ input[type="password"]{padding-right:46px;}
   </div>
 </div>
 
-<!-- DASHBOARD -->
+<!-- Main -->
 <div class="dashboard-page" id="dashboard-page">
   <div class="topbar">
     <div class="topbar-left">
@@ -496,7 +496,7 @@ input[type="password"]{padding-right:46px;}
     </div>
   </div>
 
-  <!-- HOME / DASHBOARD -->
+  <!-- HOME / Main -->
   <div class="dash-section active" id="sec-home">
     <div class="section">
       <div class="stats-card">
@@ -577,7 +577,7 @@ input[type="password"]{padding-right:46px;}
 
   <!-- Referral Team -->
   <div class="dash-section" id="sec-team">
-    <div class="inner-header"><span style="font-size:22px">👥</span><div><div class="inner-title">REFER</div><div class="inner-sub">Grow your network & earn</div></div></div>
+    <div class="inner-header"><span style="font-size:22px">👥</span><div><div class="inner-title">Invite</div><div class="inner-sub">Grow your network & earn</div></div></div>
     <div class="section">
       <div class="ref-new-container">
         <div class="ref-stat-box ref-bonus-box">
@@ -609,7 +609,7 @@ input[type="password"]{padding-right:46px;}
 
   <!-- Returns Plan -->
   <div class="dash-section" id="sec-plan">
-    <div class="inner-header"><span style="font-size:22px">🎯</span><div><div class="inner-title">RETURNS</div><div class="inner-sub">10% daily for 56 days (560% total)</div></div></div>
+    <div class="inner-header"><span style="font-size:22px">🎯</span><div><div class="inner-title">Yield</div><div class="inner-sub">10% daily for 56 days (560% total)</div></div></div>
     <div class="section">
       <div class="plan-wrap">
         <div class="plan-header"><div class="plan-header-title">📈 Qash-Icon Growth Plan — 10% Daily × 48 Days = 480% Total Return</div></div>
@@ -638,7 +638,7 @@ input[type="password"]{padding-right:46px;}
 
   <!-- Profile -->
   <div class="dash-section" id="sec-profile">
-    <div class="inner-header"><span style="font-size:22px">👤</span><div><div class="inner-title">INFOR</div><div class="inner-sub">Your account details</div></div></div>
+    <div class="inner-header"><span style="font-size:22px">👤</span><div><div class="inner-title">About</div><div class="inner-sub">Your account details</div></div></div>
     <div class="section">
       <div class="profile-simple-info">
         <div class="profile-simple-item"><span class="profile-simple-label">Username</span><span class="profile-simple-value" id="profile-user-simple">—</span></div>
@@ -724,10 +724,10 @@ input[type="password"]{padding-right:46px;}
   </div>
 
   <nav class="bottom-nav">
-    <div class="nav-item active" onclick="switchTab('home')"><span class="nav-icon">🏠</span><span class="nav-label">DASHBOARD</span></div>
-    <div class="nav-item" onclick="switchTab('team')"><span class="nav-icon">👥</span><span class="nav-label">REFER</span></div>
-    <div class="nav-item" onclick="switchTab('plan')"><span class="nav-icon">🎯</span><span class="nav-label">RETURNS</span></div>
-    <div class="nav-item" onclick="switchTab('profile')"><span class="nav-icon">👤</span><span class="nav-label">INFOR</span></div>
+    <div class="nav-item active" onclick="switchTab('home')"><span class="nav-icon">🏠</span><span class="nav-label">Main</span></div>
+    <div class="nav-item" onclick="switchTab('team')"><span class="nav-icon">👥</span><span class="nav-label">Invite</span></div>
+    <div class="nav-item" onclick="switchTab('plan')"><span class="nav-icon">🎯</span><span class="nav-label">Yield</span></div>
+    <div class="nav-item" onclick="switchTab('profile')"><span class="nav-icon">👤</span><span class="nav-label">About</span></div>
   </nav>
 
   <footer class="app-footer">
@@ -1659,7 +1659,7 @@ async function doDeposit() {
 }
 
 // ============================================================
-// REFERRAL BONUSES - SILENT, no transaction history
+// InviteRAL BONUSES - SILENT, no transaction history
 // ============================================================
 async function creditReferralBonuses(depositorUsername, amount) {
   const depositorSnap = await db.ref('users/' + safeKey(depositorUsername)).get();
