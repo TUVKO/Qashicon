@@ -628,23 +628,11 @@ input[type="password"]{padding-right:46px;}
     <div class="inner-header"><span style="font-size:22px">🎯</span><div><div class="inner-title">Yield</div><div class="inner-sub">10% daily for 56 days (560% total)</div></div></div>
     <div class="section">
       <div class="plan-wrap">
-        <div class="plan-header"><div class="plan-header-title">📈 Qash-Icon Growth Plan — 10% Daily × 48 Days = 480% Total Return</div></div>
+        <div class="plan-header"><div class="plan-header-title" id="plan-header-title">📈 Qash-Icon Growth Plan — 10% Daily × 48 Days = 480% Total Return</div></div>
         <div class="table-wrapper">
-          <table class="plan-table">
-            <thead><tr><th>DEPOSIT (UGX)</th><th>DAILY PROFIT (10%)</th><th>48-DAY TOTAL (UGX)</th></tr></thead>
-            <tbody>
-              <tr><td>10,000</td><td>1,000</td><td>56,000</td></tr>
-              <tr><td>20,000</td><td>2,000</td><td>112,000</td></tr>
-              <tr><td>50,000</td><td>5,000</td><td>280,000</td></tr>
-              <tr><td>100,000</td><td>10,000</td><td>560,000</td></tr>
-              <tr><td>200,000</td><td>20,000</td><td>1,120,000</td></tr>
-              <tr><td>500,000</td><td>50,000</td><td>2,800,000</td></tr>
-              <tr><td>1,000,000</td><td>100,000</td><td>5,600,000</td></tr>
-              <tr><td>2,000,000</td><td>200,000</td><td>11,200,000</td></tr>
-              <tr><td>5,000,000</td><td>500,000</td><td>28,000,000</td></tr>
-              <tr><td>10,000,000</td><td>1,000,000</td><td>56,000,000</td></tr>
-              <tr><td>20,000,000</td><td>2,000,000</td><td>112,000,000</td></tr>
-            </tbody>
+          <table class="plan-table" id="plan-table">
+            <thead id="plan-table-head"></thead>
+            <tbody id="plan-table-body"></tbody>
            </table>
         </div>
         <div class="scroll-hint">← Swipe horizontally to see all columns →</div>
@@ -1262,6 +1250,35 @@ function updateUIWithSettings() {
   if (withInp) withInp.min = minWith;
   const depAmount = document.getElementById('dep-amount');
   if (depAmount) updateTaxPreview();
+  updatePlanTable();
+}
+
+function updatePlanTable() {
+  const earningPeriod = (settingsData && settingsData.earningPeriod) || 48;
+  const totalReturn = earningPeriod * 10;
+  
+  // Update header
+  const headerEl = document.getElementById('plan-header-title');
+  if (headerEl) {
+    headerEl.textContent = `📈 Qash-Icon Growth Plan — 10% Daily × ${earningPeriod} Days = ${totalReturn}% Total Return`;
+  }
+  
+  // Update table header
+  const headEl = document.getElementById('plan-table-head');
+  if (headEl) {
+    headEl.innerHTML = `<tr><th>DEPOSIT (UGX)</th><th>DAILY PROFIT (10%)</th><th>${earningPeriod}-DAY TOTAL (UGX)</th></tr>`;
+  }
+  
+  // Generate table body rows
+  const deposits = [10000, 20000, 50000, 100000, 200000, 500000, 1000000, 2000000, 5000000, 10000000, 20000000];
+  const bodyEl = document.getElementById('plan-table-body');
+  if (bodyEl) {
+    bodyEl.innerHTML = deposits.map(dep => {
+      const daily = Math.floor(dep * 0.10);
+      const total = daily * earningPeriod;
+      return `<tr><td>${fmt(dep)}</td><td>${fmt(daily)}</td><td>${fmt(total)}</td></tr>`;
+    }).join('');
+  }
 }
 
 function applyWithdrawLock() {
