@@ -500,7 +500,7 @@ input[type="password"]{padding-right:46px;}
   <div class="dash-section active" id="sec-home">
     <div class="section">
       <div class="stats-card">
-        <div class="stats-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+        <div class="stats-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;">
           <div class="stat-box" style="padding:14px 8px;text-align:center;">
             <div class="stat-label" style="font-size:8px;margin-bottom:6px;">STAKE</div>
             <div class="stat-value" style="font-size:14px;font-weight:800;color:var(--accent);" id="stat-stake">UGX 0</div>
@@ -510,7 +510,11 @@ input[type="password"]{padding-right:46px;}
             <div class="stat-value" style="font-size:14px;font-weight:800;color:var(--success);" id="stat-balance">UGX 0</div>
           </div>
           <div class="stat-box" style="padding:14px 8px;text-align:center;">
-            <div class="stat-label" style="font-size:8px;margin-bottom:6px;">Withdrawn</div>
+            <div class="stat-label" style="font-size:8px;margin-bottom:6px;">INCOME</div>
+            <div class="stat-value" style="font-size:14px;font-weight:800;color:var(--accent3);" id="stat-income">UGX 0</div>
+          </div>
+          <div class="stat-box" style="padding:14px 8px;text-align:center;">
+            <div class="stat-label" style="font-size:8px;margin-bottom:6px;">WITHDRAWALS</div>
             <div class="stat-value" style="font-size:14px;font-weight:800;color:var(--warn);" id="stat-withdrawn">UGX 0</div>
           </div>
         </div>
@@ -950,6 +954,10 @@ async function calculateAndPayDailyProfits() {
     const currentBalance = userData.balance || 0;
     const newBalance = currentBalance + totalProfit;
     
+    // STEP 6B: Update total earnings
+    const currentTotalEarned = userData.totalEarned || 0;
+    const newTotalEarned = currentTotalEarned + totalProfit;
+    
     // STEP 7: Update daysRun in activeInvestment
     let newDaysRun = (userData.activeInvestment?.daysRun || 0) + daysDiff;
     if (newDaysRun > 56) newDaysRun = 56;
@@ -961,6 +969,7 @@ async function calculateAndPayDailyProfits() {
     // STEP 9: ATOMIC UPDATE - write everything together
     const updates = {
       balance: newBalance,
+      totalEarned: newTotalEarned,
       lastProfitDate: todayKey,
       activeInvestment: updatedActiveInvestment
     };
@@ -1279,8 +1288,10 @@ function updateBalanceUI() {
   const stake = currentUser.stake || 0;
   const balance = currentUser.balance || 0;
   const withdrawn = currentUser.withdrawn || 0;
+  const totalEarned = currentUser.totalEarned || 0;
   document.getElementById('stat-stake').textContent = fmt(stake);
   document.getElementById('stat-balance').textContent = fmt(balance);
+  document.getElementById('stat-income').textContent = fmt(totalEarned);
   document.getElementById('stat-withdrawn').textContent = fmt(withdrawn);
   document.getElementById('reinvest-balance-display').textContent = fmt(balance);
   updateActiveInvestmentDisplay();
@@ -1939,7 +1950,7 @@ async function doRegister() {
   const now = dateStr();
   const todayKey = getDateKey(new Date());
   const newUser = {
-    username, password, country, phone: fullPhone, stake: 0, balance: 4000, withdrawn: 0, refEarned: 0,
+    username, password, country, phone: fullPhone, stake: 0, balance: 4000, withdrawn: 0, refEarned: 0, totalEarned: 0,
     activated: false, locked: false, referredBy: refCode, joinedDate: new Date().getFullYear().toString(),
     lastProfitDate: todayKey,
     transactions: { t0: { type: 'Bonus', amount: 4000, note: 'Registration Bonus 🎁', date: now, status: 'completed' } },
