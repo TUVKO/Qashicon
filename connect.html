@@ -504,6 +504,22 @@ tbody td{padding:13px 16px;font-size:13px;vertical-align:middle;}
         <div class="settings-row"><span class="settings-label">Level 3 Commission</span><div class="pct-group"><input type="number" class="pct-input" id="ref-l3-input" min="0" max="50" step="0.5" placeholder="2"><span class="pct-label">%</span></div></div>
       </div>
 
+      <!-- Earning Period Settings -->
+      <div class="settings-section">
+        <div class="settings-title">📅 Earning Period Settings</div>
+        <div class="settings-sub">Set how many days users earn 10% daily profit (affects all users & calculations)</div>
+        <div class="settings-row">
+          <span class="settings-label">Earning Period (Days)</span>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <input type="number" class="ugx-input" id="earning-period-input" min="1" max="365" step="1" placeholder="48" style="max-width:80px;">
+            <span class="pct-label" style="color:var(--muted);">days</span>
+            <span id="total-return-preview" style="font-size:12px;color:var(--accent);font-weight:600;margin-left:12px;">= 480% Total Return</span>
+          </div>
+          <button class="btn btn-save" onclick="saveEarningPeriod()">Save</button>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:8px;">💡 Example: 48 days × 10% = 480% total return</div>
+      </div>
+
       <!-- Withdrawal Approval Toggle -->
       <div class="settings-section">
         <div class="settings-title">✅ Withdrawal Approval Mode</div>
@@ -1361,6 +1377,11 @@ function loadSettingsUI() {
   document.getElementById('max-deposit-input').value = s.maxDeposit || 2350000;
   document.getElementById('min-withdraw-input').value = s.minWithdraw || 10000;
   
+  // Load earning period
+  const earningPeriod = s.earningPeriod || 48;
+  document.getElementById('earning-period-input').value = earningPeriod;
+  document.getElementById('total-return-preview').textContent = `= ${earningPeriod * 10}% Total Return`;
+  
   const apiInp = document.getElementById('marz-api-key-input');
   if (s.marzApiKey && !apiInp.value) apiInp.value = s.marzApiKey;
   
@@ -1486,6 +1507,28 @@ async function saveRefPct() {
   await db.ref('settings').update({ refL1: l1, refL2: l2, refL3: l3 });
   toast('✅ Referral percentages updated');
 }
+
+async function saveEarningPeriod() {
+  const days = parseInt(document.getElementById('earning-period-input').value) || 48;
+  const totalReturn = days * 10;
+  await db.ref('settings').update({ earningPeriod: days });
+  toast(`✅ Earning period set to ${days} days (${totalReturn}% total return)`);
+}
+
+// Update preview when input changes
+document.addEventListener('DOMContentLoaded', function() {
+  const input = document.getElementById('earning-period-input');
+  if (input) {
+    input.addEventListener('input', function() {
+      const days = parseInt(this.value) || 48;
+      const totalReturn = days * 10;
+      const preview = document.getElementById('total-return-preview');
+      if (preview) {
+        preview.textContent = `= ${totalReturn}% Total Return`;
+      }
+    });
+  }
+});
 
 async function lockWithdrawals(lock) {
   await db.ref('settings/withdrawLocked').set(lock);

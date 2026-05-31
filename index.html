@@ -1351,7 +1351,7 @@ function updateActiveInvestmentDisplay() {
   const inv = currentUser.activeInvestment;
   const stakeAmount = currentUser.stake || 0;
   const daysRun = inv.daysRun || 0;
-  const totalDays = 56;
+  const totalDays = (settingsData && settingsData.earningPeriod) || 48;
   const progress = (daysRun / totalDays) * 100;
   document.getElementById('active-stake-amount').textContent = fmt(stakeAmount);
   document.getElementById('investment-progress-fill').style.width = progress + '%';
