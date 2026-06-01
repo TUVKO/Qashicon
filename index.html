@@ -447,7 +447,10 @@ input[type="password"]{padding-right:46px;}
         <select id="reg-country" onchange="updateRegPrefix()">
           <option value="">Select your country</option>
           <option value="UG">🇺🇬 Uganda</option>
+          <option value="SS">🇸🇸 South Sudan</option>
+          <option value="RW">🇷🇼 Rwanda</option>
           <option value="KE">🇰🇪 Kenya</option>
+          <option value="TZ">🇹🇿 Tanzania</option>
         </select>
       </div>
       <div class="field-error" id="reg-country-err">Please select your country</div>
@@ -1097,7 +1100,14 @@ function checkStrength(pw) {
 function updateRegPrefix() {
   const c = document.getElementById('reg-country').value;
   const pr = document.getElementById('reg-prefix');
-  if (pr) pr.textContent = c === 'KE' ? '+254' : '+256';
+  const prefixes = {
+    'UG': '+256',
+    'SS': '+211',
+    'RW': '+250',
+    'KE': '+254',
+    'TZ': '+255'
+  };
+  if (pr) pr.textContent = prefixes[c] || '+256';
 }
 
 function regPhoneInput(inp) { inp.value = inp.value.replace(/\D/g, '').slice(0, 9); }
@@ -2021,7 +2031,14 @@ async function doRegister() {
   if (!ok) return;
   const existing = await db.ref('users/' + safeKey(username)).get();
   if (existing.exists()) { setErr('reg-user-err', true, 'Username already taken'); return; }
-  const prefix = country === 'KE' ? '+254' : '+256';
+  const countryPrefixes = {
+    'UG': '+256',
+    'SS': '+211',
+    'RW': '+250',
+    'KE': '+254',
+    'TZ': '+255'
+  };
+  const prefix = countryPrefixes[country] || '+256';
   const fullPhone = prefix + phoneDigits;
   const now = dateStr();
   const todayKey = getDateKey(new Date());
