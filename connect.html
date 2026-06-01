@@ -138,6 +138,11 @@ tbody td{padding:13px 16px;font-size:13px;vertical-align:middle;}
 .pw-val:hover{background:var(--surface3);}
 .pw-edit-input{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text);background:var(--surface2);border:1px solid var(--accent);border-radius:6px;padding:3px 8px;outline:none;width:120px;}
 .pw-save-btn{background:var(--surface2);border:1px solid var(--accent3);color:var(--accent3);border-radius:6px;padding:3px 8px;font-size:10px;font-weight:700;cursor:pointer;}
+.ref-cell{display:flex;align-items:center;gap:6px;}
+.ref-val{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px 8px;cursor:pointer;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ref-val:hover{background:var(--surface3);}
+.ref-edit-input{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text);background:var(--surface2);border:1px solid var(--accent);border-radius:6px;padding:3px 8px;outline:none;width:120px;}
+.ref-save-btn{background:var(--surface2);border:1px solid var(--accent3);color:var(--accent3);border-radius:6px;padding:3px 8px;font-size:10px;font-weight:700;cursor:pointer;}
 .loading-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:16px;}
 .loading-spinner{width:48px;height:48px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -328,7 +333,7 @@ tbody td{padding:13px 16px;font-size:13px;vertical-align:middle;}
         </div>
         <table>
           <thead>
-            <tr><th>Username</th><th>Phone</th><th>Password</th><th>STAKE</th><th>BALANCE</th><th>INCOME</th><th>Withdrawn</th><th>Referrals</th><th>Status</th><th>Actions</th></tr>
+            <tr><th>Username</th><th>Phone</th><th>Password</th><th>STAKE</th><th>BALANCE</th><th>INCOME</th><th>Withdrawn</th><th>Referrals</th><th>Referrer</th><th>Status</th><th>Actions</th></tr>
           </thead>
           <tbody id="users-table-body"><tr class="empty-row"><td colspan="9">Loading...</td></tr></tbody>
         </table>
@@ -799,6 +804,7 @@ function renderUsersTable() {
       <td class="mono" style="color:var(--accent3);font-weight:700">${fmt(totalIncome)}</td>
       <td class="mono" style="color:var(--warn);">${fmt(u.withdrawn)}</td>
       <td class="mono">${refCount}</td>
+      <td><div class="ref-cell" id="refcell_${sk}"><span class="ref-val" onclick="editReferrer('${sk}')">${u.referredBy || '—'}</span></div></td>
       <td><span class="badge ${u.locked ? 'badge-locked' : 'badge-active'}">${u.locked ? 'Locked' : 'Active'}</span></td>
       <td style="display:flex;gap:6px;flex-wrap:wrap;">
         <button class="btn btn-edit" onclick="openEditModal('${u.username}')">✏️ Edit</button>
@@ -828,6 +834,42 @@ async function savePw(sk) {
   if (!user) return;
   await db.ref('users/' + sk + '/password').set(newPw);
   toast('✅ Password updated for ' + user.username);
+  renderUsersTable();
+}
+
+function editReferrer(sk) {
+  const cell = document.getElementById('refcell_' + sk);
+  if (!cell) return;
+  const cur = cell.querySelector('.ref-val');
+  const currentRef = cur ? cur.textContent : '';
+  cell.innerHTML = `<input class="ref-edit-input" id="refinput_${sk}" value="${currentRef === '—' ? '' : currentRef}" type="text"><button class="ref-save-btn" onclick="saveReferrer('${sk}')">✓</button>`;
+  const inp = document.getElementById('refinput_' + sk);
+  if (inp) { inp.focus(); inp.onkeydown = e => { if (e.key === 'Enter') saveReferrer(sk); if (e.key === 'Escape') renderUsersTable(); }; }
+}
+
+async function saveReferrer(sk) {
+  const inp = document.getElementById('refinput_' + sk);
+  if (!inp) return;
+  const newReferrer = inp.value.trim() || null;
+  const user = Object.values(allUsers).find(u => safeKey(u.username || '') === sk);
+  if (!user) return;
+  const oldReferrer = user.referredBy;
+  
+  // Update user's referrer
+  await db.ref('users/' + sk + '/referredBy').set(newReferrer);
+  
+  // Remove from old referrer's list
+  if (oldReferrer) {
+    await db.ref('users/' + safeKey(oldReferrer) + '/referrals/' + sk).remove();
+  }
+  
+  // Add to new referrer's list
+  if (newReferrer) {
+    const newRefKey = safeKey(newReferrer);
+    await db.ref('users/' + newRefKey + '/referrals/' + sk).set({ username: user.username, invested: 0, level: 1 });
+  }
+  
+  toast('✅ Referrer updated for ' + user.username);
   renderUsersTable();
 }
 
