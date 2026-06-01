@@ -259,7 +259,7 @@ input[type="password"]{padding-right:46px;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
 /* Forms */
-.action-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:22px 18px;}
+.action-card{background:transparent;border:none;border-radius:0;padding:0;}
 .green-btn{width:100%;background:#2d5016;border:none;border-radius:14px;padding:16px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;color:#fff;cursor:pointer;margin-top:8px;font-style:italic;text-shadow:2px 2px 4px rgba(0,0,0,0.5);}
 .green-btn:active{transform:scale(.98);}
 .green-btn:disabled{opacity:0.4;cursor:not-allowed;}
@@ -271,9 +271,9 @@ input[type="password"]{padding-right:46px;}
 .amber-btn:disabled{opacity:0.4;cursor:not-allowed;}
 
 /* Section-specific backgrounds */
-#sec-deposit .action-card{background:linear-gradient(135deg, rgba(16,185,129,.1) 0%, rgba(16,185,129,.05) 100%);border:1px solid rgba(16,185,129,.3);}
-#sec-withdraw .action-card{background:linear-gradient(135deg, rgba(255,107,91,.1) 0%, rgba(255,107,91,.05) 100%);border:1px solid rgba(255,107,91,.3);}
-#sec-reinvest .action-card{background:linear-gradient(135deg, rgba(6,182,212,.1) 0%, rgba(6,182,212,.05) 100%);border:1px solid rgba(6,182,212,.3);}
+#sec-deposit .action-card{background:transparent;border:none;}
+#sec-withdraw .action-card{background:transparent;border:none;}
+#sec-reinvest .action-card{background:transparent;border:none;}
 
 .popup-banner{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-10px);background:#1e293b;color:#fff;font-size:13px;font-weight:600;padding:14px 22px;border-radius:16px;opacity:0;transition:.35s;z-index:9998;pointer-events:none;text-align:center;max-width:320px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,.25);line-height:1.5;}
 .popup-banner.show{opacity:1;transform:translateX(-50%) translateY(0);}
@@ -662,22 +662,19 @@ input[type="password"]{padding-right:46px;}
     <div class="inner-header"><span style="font-size:22px">💳</span><div><div class="inner-title">Invest</div><div class="inner-sub">Add funds to your STAKE</div></div></div>
     <div class="section">
       <div class="action-card">
-        <div class="deposit-note" id="dep-min-note">✅ Minimum deposit: <strong>UGX 10,000</strong>. Includes 4% URA tax added to amount you pay.</div>
         <div class="field-group">
-          <label class="field-label">Mobile Money Phone Number</label>
+          <label class="field-label">Phone Number</label>
           <div class="phone-prefix-wrap" id="dep-phone-wrap">
             <div class="phone-prefix-badge" id="dep-prefix">+256</div>
             <input type="tel" id="dep-phone" placeholder="7XXXXXXXX" maxlength="9" oninput="depPhoneInput(this)">
           </div>
-          <div class="field-hint">9 digits starting with 7 (any MTN or Airtel number)</div>
           <div class="field-error" id="dep-phone-err">Enter 9 digits starting with 7</div>
         </div>
         <div class="field-group">
-          <label class="field-label">Amount to Invest (UGX)</label>
-          <div class="field-wrap"><span class="field-icon">💰</span><input type="number" id="dep-amount" placeholder="Min 10,000 — Max 2,350,000" min="10000" max="2350000"></div>
+          <label class="field-label">Amount (UGX)</label>
+          <div class="field-wrap"><span class="field-icon">💰</span><input type="number" id="dep-amount" placeholder="Min 10,000" min="10000" max="2350000"></div>
           <div class="field-error" id="dep-amount-err">Please check the amount limits</div>
         </div>
-        <div class="deposit-note" id="tax-note" style="font-size:11px;background:rgba(77, 217, 232, .1);border-color:rgba(77, 217, 232, .3);color:var(--muted);">📊 You will pay: <strong id="tax-amount">UGX 0</strong> (includes 4% URA tax)</div>
         <button class="green-btn" id="dep-submit-btn" onclick="doDeposit()">💳 INVEST NOW</button>
       </div>
     </div>
