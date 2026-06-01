@@ -36,7 +36,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 
 /* Animated Background */
 .particles-bg{position:fixed;inset:0;z-index:0;pointer-events:none;}
-.particle{position:absolute;border-radius:50%;background:radial-gradient(circle at 30% 30%, rgba(77, 217, 232, 0.8), rgba(77, 217, 232, 0.1));box-shadow:0 0 20px rgba(77, 217, 232, 0.6), inset -2px -2px 5px rgba(0,0,0,0.5);animation:float linear infinite;}
+.particle{position:absolute;border-radius:50%;background:radial-gradient(circle at 30% 30%, rgba(33, 150, 243, 0.3), rgba(33, 150, 243, 0.05));box-shadow:0 0 20px rgba(33, 150, 243, 0.2), inset -2px -2px 5px rgba(0,0,0,0.1);animation:float linear infinite;}
 @keyframes float{0%{transform:translate(var(--tx),var(--ty)) scale(1);opacity:1;}50%{opacity:0.7;}100%{transform:translate(var(--tx),calc(var(--ty) + var(--distance))) scale(1);opacity:0;}}
 .auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg);}
 .auth-card{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:32px;width:100%;max-width:450px;}

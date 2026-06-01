@@ -14,19 +14,19 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#ffffff;
-  --surface:#f8f8f8;
-  --surface2:#f0f0f0;
-  --surface3:#e8e8e8;
-  --border:#d0d0d0;
-  --accent:#2196f3;
-  --accent2:#1976d2;
-  --accent3:#2196f3;
+  --bg:#0a1628;
+  --surface:#0f1e35;
+  --surface2:#142d4a;
+  --surface3:#1a3a5a;
+  --border:#253d52;
+  --accent:#4dd9e8;
+  --accent2:#3bc7d6;
+  --accent3:#4dd9e8;
   --warn:#ff6b6b;
-  --gold:#2196f3;
-  --text:#1a1a1a;
-  --muted:#666666;
-  --success:#4caf50;
+  --gold:#4dd9e8;
+  --text:#ffffff;
+  --muted:#4dd9e8;
+  --success:#00ff41;
   --danger:#ff6b6b;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -58,7 +58,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .auth-page{display:none;flex-direction:column;min-height:100vh;padding:40px 24px;}
 .auth-page.active{display:flex;}
 .auth-hero{text-align:center;margin-bottom:28px;}
-.auth-logo{width:120px;height:120px;margin:0 auto 14px;}
+.auth-logo{width:60px;height:60px;margin:0 auto 14px;}
 .auth-brand{font-family:'Playfair Display',serif;font-size:30px;font-weight:900;color:var(--accent);margin-bottom:4px;}
 .auth-tagline{font-size:12px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
 .auth-card{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:28px 22px;}
@@ -537,6 +537,14 @@ input[type="password"]{padding-right:46px;}
       </div>
     </div>
 
+    <!-- Referral Link Section - Positioned After Stats -->
+    <div class="section">
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="text" class="ref-link-input" id="ref-url-new" readonly style="flex:1;padding:12px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--accent);font-size:12px;font-family:'JetBrains Mono',monospace;">
+        <button class="ref-copy-btn" onclick="copyRef()" style="padding:12px 16px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-weight:600;font-size:12px;cursor:pointer;">Copy</button>
+      </div>
+    </div>
+
     <!-- Active Investment Display -->
     <div class="section" id="active-investment-section" style="display:none;">
       <div class="investment-card">
@@ -555,15 +563,9 @@ input[type="password"]{padding-right:46px;}
         <button class="action-btn" style="background:#3d5a6c;border:none;color:white;padding:10px 16px;border-radius:10px;font-weight:600;font-size:13px;font-style:italic;text-shadow:2px 2px 4px rgba(0,0,0,0.5);flex:1;min-width:90px;max-width:120px;" onclick="switchTab('reinvest')"><span class="btn-icon">🔄</span> Re-Invest</button>
       </div>
     </div>
+
     <div class="section">
-      <div class="ref-box">
-        <span style="font-size:16px;">🔗</span>
-        <div class="ref-url" id="ref-url">Loading referral link...</div>
-        <button class="copy-btn" onclick="copyRef()">Copy</button>
-      </div>
-    </div>
-    <div class="section">
-      <button class="wa-btn" onclick="openWaGroup()">💬 Join our channel</button>
+      <button class="wa-btn" onclick="openWaGroup()">💬 Wap Group</button>
     </div>
   </div>
 
@@ -614,18 +616,6 @@ input[type="password"]{padding-right:46px;}
     </div>
 
     <!-- Referral Link Section -->
-    <div class="section">
-      <div style="padding:16px;border:1px solid var(--accent);border-radius:12px;background:rgba(212,175,55,0.08);">
-        <div style="font-size:13px;color:var(--accent);font-weight:600;margin-bottom:12px;">🔗 Share & Earn</div>
-        <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Invite friends, earn 10-2% on 3 levels</div>
-        <div style="display:flex;gap:8px;">
-          <input type="text" class="ref-link-input" id="ref-url-new" readonly style="flex:1;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:12px;">
-          <button class="ref-copy-btn" onclick="copyRef()" style="padding:10px 16px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-weight:600;font-size:12px;cursor:pointer;">Copy</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Unified Referral Members List -->
     <div class="section">
       <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:12px;">📋 Your Network</div>
       <div id="ref-members-new" style="display:flex;flex-direction:column;gap:8px;">
