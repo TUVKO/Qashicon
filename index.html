@@ -442,6 +442,9 @@ input[type="password"]{padding-right:46px;}
     <div class="auth-tagline">Start Earning Today</div>
   </div>
   <div class="auth-card">
+    <div style="text-align:center;margin-bottom:16px;padding:10px;background:rgba(212,175,55,0.1);border-radius:8px;border:1px solid rgba(212,175,55,0.3);">
+      <div style="font-size:12px;color:#999999;">Referred by: <strong id="reg-referrer-msg" style="color:var(--accent);">None</strong></div>
+    </div>
     <div class="auth-title">Create Account</div>
     <div class="auth-subtitle">Get UGX 4,000 registration bonus 🎁</div>
     <div class="field-group">
@@ -477,10 +480,6 @@ input[type="password"]{padding-right:46px;}
       <div class="field-wrap"><span class="field-icon">🔒</span><input type="password" id="reg-password" placeholder="Min. 6 characters" oninput="checkStrength(this.value)"><button class="eye-btn" onclick="toggleEye('reg-password',this)">👁️</button></div>
       <div class="pw-strength"><div class="pw-bar" id="pw-b1"></div><div class="pw-bar" id="pw-b2"></div><div class="pw-bar" id="pw-b3"></div></div>
       <div class="field-error" id="reg-pw-err">Password must be at least 6 characters</div>
-    </div>
-    <div class="field-group">
-      <label class="field-label">Referred By</label>
-      <div style="background:#fff0f4;padding:12px 14px;border-radius:8px;border:1px solid var(--border);color:var(--accent);font-weight:600;" id="reg-referrer-display">None</div>
     </div>
     <div class="field-error" id="reg-general-err" style="text-align:center;margin-bottom:10px;font-size:12px;"></div>
     <button class="submit-btn" onclick="doRegister()">Create Account & Earn 🎁</button>
@@ -1141,8 +1140,8 @@ function showAuth(id) {
   if (id === 'register-page') {
     const urlParams = new URLSearchParams(window.location.search);
     const refCode = urlParams.get('ref') || null;
-    const refDisplay = document.getElementById('reg-referrer-display');
-    if (refDisplay) refDisplay.textContent = refCode || 'None';
+    const refMsg = document.getElementById('reg-referrer-msg');
+    if (refMsg) refMsg.textContent = refCode || 'None';
   }
 }
 
@@ -2130,7 +2129,7 @@ function startInactivityWatcher() {
   if (openReg) {
     sessionStorage.removeItem('pp_open_register');
     const refCode = sessionStorage.getItem('pp_pending_ref');
-    if (refCode && document.getElementById('reg-referrer-display')) document.getElementById('reg-referrer-display').textContent = refCode;
+    if (refCode && document.getElementById('reg-referrer-msg')) document.getElementById('reg-referrer-msg').textContent = refCode;
   }
 })();
 
