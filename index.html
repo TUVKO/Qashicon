@@ -467,21 +467,16 @@ input[type="password"]{padding-right:46px;}
       <label class="field-label">Phone Number</label>
       <div class="phone-prefix-wrap" id="reg-phone-wrap">
         <div class="phone-prefix-badge" id="reg-prefix">+256</div>
-        <input type="tel" id="reg-phone" placeholder="7XXXXXXXX" maxlength="9" oninput="regPhoneInput(this)">
+        <input type="tel" id="reg-phone" placeholder="0XXXXXXXXX" maxlength="10" oninput="regPhoneInput(this)">
       </div>
-      <div class="field-hint">9 digits starting with 7</div>
-      <div class="field-error" id="reg-phone-err">Enter 9 digits starting with 7</div>
+      <div class="field-hint">10 digits starting with 0</div>
+      <div class="field-error" id="reg-phone-err">Enter 10 digits starting with 0</div>
     </div>
     <div class="field-group">
       <label class="field-label">Password</label>
       <div class="field-wrap"><span class="field-icon">🔒</span><input type="password" id="reg-password" placeholder="Min. 6 characters" oninput="checkStrength(this.value)"><button class="eye-btn" onclick="toggleEye('reg-password',this)">👁️</button></div>
       <div class="pw-strength"><div class="pw-bar" id="pw-b1"></div><div class="pw-bar" id="pw-b2"></div><div class="pw-bar" id="pw-b3"></div></div>
       <div class="field-error" id="reg-pw-err">Password must be at least 6 characters</div>
-    </div>
-    <div class="field-group">
-      <label class="field-label">Confirm Password</label>
-      <div class="field-wrap"><span class="field-icon">🔐</span><input type="password" id="reg-confirm" placeholder="Repeat password"><button class="eye-btn" onclick="toggleEye('reg-confirm',this)">👁️</button></div>
-      <div class="field-error" id="reg-confirm-err">Passwords do not match</div>
     </div>
     <div class="field-group">
       <label class="field-label">Referred By</label>
@@ -1123,7 +1118,7 @@ function updateRegPrefix() {
   if (pr) pr.textContent = prefixes[c] || '+256';
 }
 
-function regPhoneInput(inp) { inp.value = inp.value.replace(/\D/g, '').slice(0, 9); }
+function regPhoneInput(inp) { inp.value = inp.value.replace(/\D/g, '').slice(0, 10); }
 function depPhoneInput(inp) { inp.value = inp.value.replace(/\D/g, '').slice(0, 9); }
 
 function copyRef() {
@@ -2027,20 +2022,18 @@ async function doLogin() {
 }
 
 async function doRegister() {
-  clearErrors('reg-user-err', 'reg-country-err', 'reg-phone-err', 'reg-pw-err', 'reg-confirm-err', 'reg-general-err');
+  clearErrors('reg-user-err', 'reg-country-err', 'reg-phone-err', 'reg-pw-err', 'reg-general-err');
   const username = document.getElementById('reg-username').value.trim();
   const country = document.getElementById('reg-country').value;
   const phoneDigits = document.getElementById('reg-phone').value.trim();
   const password = document.getElementById('reg-password').value;
-  const confirm = document.getElementById('reg-confirm').value;
   const urlParams = new URLSearchParams(window.location.search);
   const refCode = urlParams.get('ref') || null;
   let ok = true;
   if (!username) { setErr('reg-user-err', true, 'Username is required'); ok = false; }
   if (!country) { setErr('reg-country-err', true, 'Please select your country'); ok = false; }
-  if (!phoneDigits || phoneDigits.length !== 9 || !phoneDigits.startsWith('7')) { setErr('reg-phone-err', true, 'Enter 9 digits starting with 7'); ok = false; }
+  if (!phoneDigits || phoneDigits.length !== 10 || !phoneDigits.startsWith('0')) { setErr('reg-phone-err', true, 'Enter 10 digits starting with 0'); ok = false; }
   if (!password || password.length < 6) { setErr('reg-pw-err', true, 'Password must be at least 6 characters'); ok = false; }
-  if (!confirm || confirm !== password) { setErr('reg-confirm-err', true, 'Passwords do not match'); ok = false; }
   if (!ok) return;
   const existing = await db.ref('users/' + safeKey(username)).get();
   if (existing.exists()) { setErr('reg-user-err', true, 'Username already taken'); return; }
@@ -2052,12 +2045,13 @@ async function doRegister() {
     'TZ': '+255'
   };
   const prefix = countryPrefixes[country] || '+256';
-  const fullPhone = prefix + phoneDigits;
+  // Convert 07xxxxxxxx to +2567xxxxxxxx (remove 0, add prefix+7)
+  const convertedPhone = prefix + '7' + phoneDigits.slice(1);
   const now = dateStr();
   const todayKey = getDateKey(new Date());
   const timestamp = Date.now();
   const newUser = {
-    username, password, country, phone: fullPhone, stake: 0, balance: 4000, withdrawn: 0, refEarned: 0, totalEarned: 0,
+    username, password, country, phone: convertedPhone, stake: 0, balance: 4000, withdrawn: 0, refEarned: 0, totalEarned: 0,
     activated: false, locked: false, referredBy: refCode, joinedDate: new Date().getFullYear().toString(),
     lastProfitDate: todayKey,
     transactions: { t0: { type: 'Bonus', amount: 4000, note: 'Registration Bonus 🎁', date: now, status: 'completed', timestamp: timestamp } },
