@@ -98,7 +98,10 @@ tbody tr:last-child{border-bottom:none;}
 tbody tr:hover{background:var(--surface2);}
 tbody td{padding:13px 16px;font-size:13px;vertical-align:middle;}
 .mono{font-family:'JetBrains Mono',monospace;font-size:12px;}
-.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;}
+.refresh-btn{background:none;border:none;font-size:20px;cursor:pointer;padding:8px;color:var(--accent);transition:transform .3s;margin-right:16px;}
+.refresh-btn:hover{color:var(--accent2);}
+.refresh-btn.loading{animation:spin 1s linear infinite;}
+@keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
 .badge-pending{background:var(--surface2);color:var(--muted);border:1px solid var(--muted);}
 .badge-approved{background:var(--surface2);color:var(--success);border:1px solid var(--success);}
 .badge-rejected{background:var(--surface2);color:var(--warn);border:1px solid var(--warn);}
@@ -314,8 +317,13 @@ tbody td{padding:13px 16px;font-size:13px;vertical-align:middle;}
   <div class="main-content">
     <!-- Main -->
     <div class="page active" id="pg-dashboard">
-      <div class="page-title">Dashboard</div>
-      <div class="page-sub">Real-time platform overview</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <div>
+          <div class="page-title">Dashboard</div>
+          <div class="page-sub">Real-time platform overview</div>
+        </div>
+        <button class="refresh-btn" id="refresh-btn" onclick="refreshDashboard()" title="Refresh data">🔄</button>
+      </div>
       <div class="stats-row">
         <div class="stat-card"><div class="stat-card-label">Total Users</div><div class="stat-card-val green" id="d-total-users">—</div></div>
         <div class="stat-card"><div class="stat-card-label">Total STAKE</div><div class="stat-card-val gold" id="d-total-stake">—</div></div>
@@ -717,6 +725,51 @@ function dateStr() { const d = new Date(); return d.toLocaleDateString('en-UG', 
 function safeKey(u) { return (u || '').replace(/[.#$\[\]]/g, '_'); }
 function genUUID() { return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,c=>(c^crypto.getRandomValues(new Uint8Array(1))[0]&15>>c/4).toString(16)); }
 
+// ===== DATA CACHING SYSTEM =====
+const CACHE_KEY = 'admin_dashboard_cache';
+const CACHE_TIMESTAMP_KEY = 'admin_cache_timestamp';
+
+function getCachedData() {
+  try {
+    const cached = localStorage.getItem(CACHE_KEY);
+    return cached ? JSON.parse(cached) : null;
+  } catch (e) {
+    console.error('Cache read error:', e);
+    return null;
+  }
+}
+
+function setCachedData(data) {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+    localStorage.setItem(CACHE_TIMESTAMP_KEY, Date.now().toString());
+  } catch (e) {
+    console.error('Cache write error:', e);
+  }
+}
+
+function clearCache() {
+  try {
+    localStorage.removeItem(CACHE_KEY);
+    localStorage.removeItem(CACHE_TIMESTAMP_KEY);
+  } catch (e) {
+    console.error('Cache clear error:', e);
+  }
+}
+
+function refreshDashboard() {
+  const btn = document.getElementById('refresh-btn');
+  btn.classList.add('loading');
+  
+  // Clear the cache
+  clearCache();
+  
+  // Reload the page to fetch fresh data
+  setTimeout(() => {
+    location.reload();
+  }, 500);
+}
+
 function toast(msg, color) { const t = document.getElementById('toast'); t.textContent = msg; t.style.background = color || 'var(--accent3)'; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2800); }
 function confirmAction(title, text) { return Swal.fire({ title, text, icon: 'warning', showCancelButton: true, confirmButtonColor: '#4dd9e8', confirmButtonText: 'Yes, proceed!' }).then(result => result.isConfirmed); }
 function setErr(id, show, msg) { const el = document.getElementById(id); if (!el) return; if (show) { el.classList.add('show'); if (msg) el.textContent = msg; } else { el.classList.remove('show'); } }
@@ -726,6 +779,15 @@ function startRealtimeListeners() {
   if (usersUnsubscribe) usersUnsubscribe();
   usersUnsubscribe = db.ref('users').on('value', (snap) => {
     allUsers = snap.val() || {};
+    // Cache the data
+    const cacheData = {
+      users: allUsers,
+      settings: allSettings,
+      withdrawals: allWithdrawals,
+      adminTx: allAdminTransactions
+    };
+    setCachedData(cacheData);
+    
     renderDashboard();
     renderUsersTable();
     renderTube();
@@ -735,6 +797,15 @@ function startRealtimeListeners() {
   if (settingsUnsubscribe) settingsUnsubscribe();
   settingsUnsubscribe = db.ref('settings').on('value', (snap) => {
     if (snap.exists()) allSettings = snap.val();
+    // Cache the data
+    const cacheData = {
+      users: allUsers,
+      settings: allSettings,
+      withdrawals: allWithdrawals,
+      adminTx: allAdminTransactions
+    };
+    setCachedData(cacheData);
+    
     loadSettingsUI();
     renderDashboard();
   });
@@ -742,6 +813,15 @@ function startRealtimeListeners() {
   if (withdrawalsUnsubscribe) withdrawalsUnsubscribe();
   withdrawalsUnsubscribe = db.ref('pendingWithdrawals').on('value', (snap) => {
     allWithdrawals = snap.val() || {};
+    // Cache the data
+    const cacheData = {
+      users: allUsers,
+      settings: allSettings,
+      withdrawals: allWithdrawals,
+      adminTx: allAdminTransactions
+    };
+    setCachedData(cacheData);
+    
     renderWithdrawalsStats();
     renderWithdrawalsTable();
     updateWithdrawalsBadge();
@@ -751,6 +831,15 @@ function startRealtimeListeners() {
   if (adminTxUnsubscribe) adminTxUnsubscribe();
   adminTxUnsubscribe = db.ref('adminTransactions').on('value', (snap) => {
     allAdminTransactions = snap.val() || {};
+    // Cache the data
+    const cacheData = {
+      users: allUsers,
+      settings: allSettings,
+      withdrawals: allWithdrawals,
+      adminTx: allAdminTransactions
+    };
+    setCachedData(cacheData);
+    
     renderAdminTransactions();
   });
   
@@ -1793,6 +1882,25 @@ function showPanel() {
   document.getElementById('loading-screen').style.display = 'none';
   document.getElementById('auth-wrap').style.display = 'none';
   document.getElementById('admin-wrap').classList.add('active');
+  
+  // Try to use cached data first
+  const cachedData = getCachedData();
+  if (cachedData) {
+    allUsers = cachedData.users || {};
+    allSettings = cachedData.settings || allSettings;
+    allWithdrawals = cachedData.withdrawals || {};
+    allAdminTransactions = cachedData.adminTx || {};
+    
+    renderDashboard();
+    renderUsersTable();
+    renderTube();
+    renderTransactions();
+    loadSettingsUI();
+    renderWithdrawals();
+    renderAdminTransactions();
+  }
+  
+  // Always start listeners for real-time updates (but don't show loading if cache exists)
   startRealtimeListeners();
 }
 
