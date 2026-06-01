@@ -81,7 +81,7 @@ input[type="password"]{padding-right:46px;}
 .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px 16px;}
 .stat-card-label{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:10px;}
 .stat-card-val{font-size:20px;font-weight:800;font-family:'JetBrains Mono',monospace;}
-.stat-card-val.green{color:var(--accent)}.stat-card-val.emerald{color:var(--success)}.stat-card-val.gold{color:var(--gold)}.stat-card-val.red{color:var(--warn)}.stat-card-val.amber{color:var(--accent2)}
+.stat-card-val.green{color:var(--accent)}.stat-card-val.emerald{color:var(--success)}.stat-card-val.gold{color:var(--muted)}.stat-card-val.red{color:var(--warn)}.stat-card-val.amber{color:var(--accent2)}
 .table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:20px;}
 .table-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
 .table-title{font-size:14px;font-weight:800;}
@@ -94,7 +94,7 @@ tbody tr:hover{background:var(--surface2);}
 tbody td{padding:13px 16px;font-size:13px;vertical-align:middle;}
 .mono{font-family:'JetBrains Mono',monospace;font-size:12px;}
 .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;}
-.badge-pending{background:var(--surface2);color:var(--gold);border:1px solid var(--gold);}
+.badge-pending{background:var(--surface2);color:var(--muted);border:1px solid var(--muted);}
 .badge-approved{background:var(--surface2);color:var(--success);border:1px solid var(--success);}
 .badge-rejected{background:var(--surface2);color:var(--warn);border:1px solid var(--warn);}
 .badge-locked{background:var(--surface2);color:var(--warn);border:1px solid var(--warn);}
@@ -134,7 +134,7 @@ tbody td{padding:13px 16px;font-size:13px;vertical-align:middle;}
 .pct-pill{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:8px 14px;font-size:12px;}
 .pct-pill span{color:var(--accent);font-weight:800;}
 .pw-cell{display:flex;align-items:center;gap:6px;}
-.pw-val{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold);background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px 8px;cursor:pointer;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.pw-val{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px 8px;cursor:pointer;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .pw-val:hover{background:var(--surface3);}
 .pw-edit-input{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text);background:var(--surface2);border:1px solid var(--accent);border-radius:6px;padding:3px 8px;outline:none;width:120px;}
 .pw-save-btn{background:var(--surface2);border:1px solid var(--accent3);color:var(--accent3);border-radius:6px;padding:3px 8px;font-size:10px;font-weight:700;cursor:pointer;}
@@ -705,7 +705,7 @@ function safeKey(u) { return (u || '').replace(/[.#$\[\]]/g, '_'); }
 function genUUID() { return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,c=>(c^crypto.getRandomValues(new Uint8Array(1))[0]&15>>c/4).toString(16)); }
 
 function toast(msg, color) { const t = document.getElementById('toast'); t.textContent = msg; t.style.background = color || 'var(--accent3)'; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2800); }
-function confirmAction(title, text) { return Swal.fire({ title, text, icon: 'warning', showCancelButton: true, confirmButtonColor: '#d4af37', confirmButtonText: 'Yes, proceed!' }).then(result => result.isConfirmed); }
+function confirmAction(title, text) { return Swal.fire({ title, text, icon: 'warning', showCancelButton: true, confirmButtonColor: '#4dd9e8', confirmButtonText: 'Yes, proceed!' }).then(result => result.isConfirmed); }
 function setErr(id, show, msg) { const el = document.getElementById(id); if (!el) return; if (show) { el.classList.add('show'); if (msg) el.textContent = msg; } else { el.classList.remove('show'); } }
 function clearErrors(...ids) { ids.forEach(id => setErr(id, false)); }
 
@@ -794,7 +794,7 @@ function renderUsersTable() {
       <td><strong>${u.username || '—'}</strong></td>
       <td class="mono">${u.phone || '—'}</td>
       <td><div class="pw-cell" id="pwcell_${sk}"><span class="pw-val" onclick="editPw('${sk}')">${u.password || '—'}</span></div></td>
-      <td class="mono" style="color:var(--gold)">${fmt(u.stake)}</td>
+      <td class="mono" style="color:var(--muted)">${fmt(u.stake)}</td>
       <td class="mono" style="color:var(--success);font-weight:700">${fmt(u.balance)}</td>
       <td class="mono" style="color:var(--accent3);font-weight:700">${fmt(totalIncome)}</td>
       <td class="mono" style="color:var(--warn);">${fmt(u.withdrawn)}</td>
@@ -963,7 +963,7 @@ function renderTransactions() {
   if (!filtered.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="7">No transactions found<\/tr>'; return; }
   
   tbody.innerHTML = filtered.map(tx => {
-    let statusColor = 'var(--gold)', statusText = '⏳ Pending';
+    let statusColor = 'var(--muted)', statusText = '⏳ Pending';
     if (tx.status === 'completed' || tx.status === 'successful') { statusColor = 'var(--success)'; statusText = '✅ Completed'; }
     else if (tx.status === 'failed') { statusColor = 'var(--warn)'; statusText = '❌ Failed'; }
     const amountColor = tx.amount > 0 ? 'var(--success)' : 'var(--warn)';
@@ -1001,7 +1001,7 @@ function renderAdminTransactions() {
   if (!txs.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="8">No transactions found<\/tr>'; return; }
   
   tbody.innerHTML = txs.map(tx => {
-    let statusColor = 'var(--gold)', statusText = '⏳ Pending';
+    let statusColor = 'var(--muted)', statusText = '⏳ Pending';
     if (tx.status === 'successful') { statusColor = 'var(--success)'; statusText = '✅ Successful'; }
     else if (tx.status === 'failed') { statusColor = 'var(--warn)'; statusText = '❌ Failed'; }
     const typeIcon = tx.type === 'Deposit' ? '💳' : '💸';
@@ -1089,7 +1089,7 @@ function renderWithdrawalsTable() {
   if (!entries.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="8">No withdrawal requests yet<\/tr>'; return; }
   
   tbody.innerHTML = entries.map(([k, v]) => {
-    const sc = v.status === 'approved' ? 'var(--success)' : v.status === 'rejected' ? 'var(--warn)' : 'var(--gold)';
+    const sc = v.status === 'approved' ? 'var(--success)' : v.status === 'rejected' ? 'var(--warn)' : 'var(--muted)';
     const si = v.status === 'approved' ? '✅ Approved' : v.status === 'rejected' ? '❌ Rejected' : '⏳ Pending';
     const fee = Math.round((v.amount || 0) * 0.10);
     const sendAmt = v.sendAmount || (v.amount - fee);
@@ -1102,7 +1102,7 @@ function renderWithdrawalsTable() {
       <td><strong>${v.username || '—'}</strong></td>
       <td class="mono">${v.phone || '—'}</td>
       <td class="mono" style="color:var(--warn);font-weight:800;">${fmt(v.amount)}</td>
-      <td class="mono" style="color:var(--gold);">${fmt(fee)}</td>
+      <td class="mono" style="color:var(--muted);">${fmt(fee)}</td>
       <td class="mono" style="color:var(--success);font-weight:800;">${fmt(sendAmt)}</td>
       <td><span style="font-size:11px;font-weight:700;color:${sc};">${si}</span></td>
       <td style="display:flex;gap:6px;flex-wrap:wrap;">${actions}</td>
@@ -1636,7 +1636,7 @@ function renderAwHistory() {
     <tr>
       <td class="mono" style="font-size:11px;">${h.date}</td>
       <td class="mono">${h.phone}</td>
-      <td class="mono" style="color:var(--gold);">${fmt(h.amount)}</td>
+      <td class="mono" style="color:var(--muted);">${fmt(h.amount)}</td>
       <td style="font-size:12px;font-weight:700;">${h.status}</td>
     </tr>
   `).join('');
@@ -2012,7 +2012,7 @@ function showTerms() {
     </div>`,
     icon: 'info',
     confirmButtonText: 'Understood',
-    confirmButtonColor: '#d4af37',
+    confirmButtonColor: '#4dd9e8',
     width: '500px'
   });
 }
@@ -2037,7 +2037,7 @@ function showPrivacy() {
     </div>`,
     icon: 'info',
     confirmButtonText: 'Understood',
-    confirmButtonColor: '#d4af37',
+    confirmButtonColor: '#4dd9e8',
     width: '500px'
   });
 }
