@@ -537,6 +537,14 @@ input[type="password"]{padding-right:46px;}
       </div>
     </div>
 
+    <!-- Referral Link Section - Positioned After Stats -->
+    <div class="section">
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="text" class="ref-link-input" id="ref-url-new" readonly style="flex:1;padding:12px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--accent);font-size:12px;font-family:'JetBrains Mono',monospace;">
+        <button class="ref-copy-btn" onclick="copyRef()" style="padding:12px 16px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-weight:600;font-size:12px;cursor:pointer;">Copy</button>
+      </div>
+    </div>
+
     <!-- Active Investment Display -->
     <div class="section" id="active-investment-section" style="display:none;">
       <div class="investment-card">
@@ -555,13 +563,7 @@ input[type="password"]{padding-right:46px;}
         <button class="action-btn" style="background:#3d5a6c;border:none;color:white;padding:10px 16px;border-radius:10px;font-weight:600;font-size:13px;font-style:italic;text-shadow:2px 2px 4px rgba(0,0,0,0.5);flex:1;min-width:90px;max-width:120px;" onclick="switchTab('reinvest')"><span class="btn-icon">🔄</span> Re-Invest</button>
       </div>
     </div>
-    <div class="section">
-      <div class="ref-box">
-        <span style="font-size:16px;">🔗</span>
-        <div class="ref-url" id="ref-url">Loading referral link...</div>
-        <button class="copy-btn" onclick="copyRef()">Copy</button>
-      </div>
-    </div>
+
     <div class="section">
       <button class="wa-btn" onclick="openWaGroup()">💬 Join our channel</button>
     </div>
@@ -614,18 +616,6 @@ input[type="password"]{padding-right:46px;}
     </div>
 
     <!-- Referral Link Section -->
-    <div class="section">
-      <div style="padding:16px;border:1px solid var(--accent);border-radius:12px;background:rgba(212,175,55,0.08);">
-        <div style="font-size:13px;color:var(--accent);font-weight:600;margin-bottom:12px;">🔗 Share & Earn</div>
-        <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Invite friends, earn 10-2% on 3 levels</div>
-        <div style="display:flex;gap:8px;">
-          <input type="text" class="ref-link-input" id="ref-url-new" readonly style="flex:1;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:12px;">
-          <button class="ref-copy-btn" onclick="copyRef()" style="padding:10px 16px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-weight:600;font-size:12px;cursor:pointer;">Copy</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Unified Referral Members List -->
     <div class="section">
       <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:12px;">📋 Your Network</div>
       <div id="ref-members-new" style="display:flex;flex-direction:column;gap:8px;">
