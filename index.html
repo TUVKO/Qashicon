@@ -32,6 +32,11 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;max-width:500px;margin:0 auto;position:relative;overflow-x:hidden;}
 
+/* Animated Background */
+.particles-bg{position:fixed;inset:0;z-index:0;pointer-events:none;}
+.particle{position:absolute;border-radius:50%;background:radial-gradient(circle at 30% 30%, rgba(77, 217, 232, 0.8), rgba(77, 217, 232, 0.1));box-shadow:0 0 20px rgba(77, 217, 232, 0.6), inset -2px -2px 5px rgba(0,0,0,0.5);animation:float linear infinite;}
+@keyframes float{0%{transform:translate(var(--tx),var(--ty)) scale(1);opacity:1;}50%{opacity:0.7;}100%{transform:translate(var(--tx),calc(var(--ty) + var(--distance))) scale(1);opacity:0;}}
+
 /* Avatar Styles */
 .avatar{
   background:linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
@@ -394,6 +399,9 @@ input[type="password"]{padding-right:46px;}
 </style>
 </head>
 <body>
+
+<!-- Animated Particle Background -->
+<div class="particles-bg" id="particles-bg"></div>
 
 <div class="loading-screen" id="loading-screen">
   <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:900;color:var(--accent);margin-bottom:10px;">Qash-Icon</div>
@@ -2128,6 +2136,42 @@ function startInactivityWatcher() {
     if (refCode && document.getElementById('reg-referrer-display')) document.getElementById('reg-referrer-display').textContent = refCode;
   }
 })();
+
+// Animated Particle Background Generator
+function initParticles() {
+  const container = document.getElementById('particles-bg');
+  if (!container) return;
+  
+  const particleCount = 40;
+  const colors = ['rgba(77, 217, 232, 0.8)', 'rgba(59, 199, 214, 0.7)', 'rgba(77, 217, 232, 0.6)'];
+  
+  for (let i = 0; i < particleCount; i++) {
+    const particle = document.createElement('div');
+    particle.className = 'particle';
+    
+    const size = Math.random() * 80 + 20;
+    const duration = Math.random() * 20 + 15;
+    const delay = Math.random() * 5;
+    const startX = Math.random() * 100;
+    const startY = Math.random() * 120 - 20;
+    const endX = startX + (Math.random() - 0.5) * 150;
+    const distance = Math.random() * 600 + 300;
+    
+    particle.style.width = size + 'px';
+    particle.style.height = size + 'px';
+    particle.style.left = startX + '%';
+    particle.style.top = startY + '%';
+    particle.style.setProperty('--tx', (endX - startX) + 'px');
+    particle.style.setProperty('--ty', '0px');
+    particle.style.setProperty('--distance', distance + 'px');
+    particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+    particle.style.animation = `float ${duration}s linear ${delay}s infinite`;
+    
+    container.appendChild(particle);
+  }
+}
+
+initParticles();
 
 initApp();
 </script>
