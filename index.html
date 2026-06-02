@@ -2169,6 +2169,45 @@ function initParticles() {
 
 initParticles();
 
+// ===== AUTO-DELETE TRANSACTIONS OLDER THAN 6 HOURS =====
+function cleanupOldTransactions() {
+  const SIX_HOURS = 6 * 60 * 60 * 1000; // 6 hours in milliseconds
+  const now = Date.now();
+  
+  db.ref('users').once('value', (snapshot) => {
+    if (!snapshot.exists()) return;
+    
+    const users = snapshot.val();
+    Object.keys(users).forEach(username => {
+      const user = users[username];
+      const transactions = user.transactions || {};
+      let hasChanges = false;
+      
+      Object.keys(transactions).forEach(txId => {
+        const tx = transactions[txId];
+        const txTimestamp = tx.timestamp || 0;
+        const age = now - txTimestamp;
+        
+        // Delete if older than 6 hours
+        if (age > SIX_HOURS) {
+          db.ref(`users/${username}/transactions/${txId}`).remove().catch(err => {
+            console.error(`Failed to delete transaction ${txId} for ${username}:`, err);
+          });
+          hasChanges = true;
+        }
+      });
+    });
+  }).catch(err => {
+    console.error('Cleanup error:', err);
+  });
+}
+
+// Run cleanup every 6 hours
+setInterval(cleanupOldTransactions, 6 * 60 * 60 * 1000);
+
+// Also run on app startup
+cleanupOldTransactions();
+
 initApp();
 </script>
 </body>
