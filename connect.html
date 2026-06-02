@@ -2042,15 +2042,12 @@ async function adminRegister() {
       return;
     }
     
-    // Mask password for storage
-    const maskedPassword = maskPassword(password);
-    
-    // Save to Firebase
+    // Save to Firebase (password saved as plain text)
     await db.ref('adminAccounts/' + safeKey(username)).set({
       username: username,
       phone: phone,
       pin: pin,
-      password: maskedPassword,
+      password: password,
       position: position,
       createdAt: dateStr(),
       createdBy: currentAdmin ? currentAdmin.username : 'System'
