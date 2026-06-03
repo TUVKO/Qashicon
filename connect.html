@@ -607,7 +607,7 @@ tbody td{padding:13px 16px;font-size:13px;vertical-align:middle;}
 </div>
 
 <!-- MODALS -->
-<div class="modal-ov" id="edit-modal" style="position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;display:none;align-items:center;justify-content:center;padding:24px;"><div class="modal-box" style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:440px;"><div class="modal-title" style="font-family:'Playfair Display',serif;font-size:17px;font-weight:800;margin-bottom:18px;color:var(--accent);">✏️ Edit User</div><input type="hidden" id="edit-username"><div class="modal-row" style="margin-bottom:14px;"><label class="modal-label" style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;display:block;">Password</label><input type="text" class="modal-input" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);outline:none;" id="edit-password"></div><div class="modal-row" style="margin-bottom:14px;"><label class="modal-label">Phone Number</label><input type="text" class="modal-input" id="edit-phone-modal" placeholder="+256..."></div><div class="modal-row" style="margin-bottom:14px;"><label class="modal-label">DEPOSITED (UGX)</label><input type="number" class="modal-input" id="edit-stake" min="0"></div><div class="modal-row" style="margin-bottom:14px;"><label class="modal-label">BALANCE (UGX)</label><input type="number" class="modal-input" id="edit-balance" min="0"></div><div class="modal-actions" style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end;"><button class="modal-cancel" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 20px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;" onclick="closeEditModal()">Cancel</button><button class="btn btn-save" onclick="saveEditUser()">Save Changes</button></div></div></div>
+<div class="modal-ov" id="edit-modal" style="position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;display:none;align-items:center;justify-content:center;padding:24px;"><div class="modal-box" style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:440px;"><div class="modal-title" style="font-family:'Playfair Display',serif;font-size:17px;font-weight:800;margin-bottom:18px;color:var(--accent);">✏️ Edit User</div><input type="hidden" id="edit-username"><div class="modal-row" style="margin-bottom:14px;"><label class="modal-label" style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;display:block;">Password</label><input type="text" class="modal-input" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);outline:none;" id="edit-password"></div><div class="modal-row" style="margin-bottom:14px;"><label class="modal-label">Phone Number</label><input type="text" class="modal-input" id="edit-phone-modal" placeholder="+256..."></div><div class="modal-row" style="margin-bottom:14px;"><label class="modal-label">DEPOSITED (UGX)</label><input type="number" class="modal-input" id="edit-stake" min="0"></div><div class="modal-row" style="margin-bottom:14px;"><label class="modal-label">BALANCE (UGX)</label><input type="number" class="modal-input" id="edit-balance" min="0"></div><div class="modal-row" style="margin-bottom:14px;"><label class="modal-label">INCOME (UGX)</label><input type="number" class="modal-input" id="edit-income" min="0"></div><div class="modal-actions" style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end;"><button class="modal-cancel" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 20px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;" onclick="closeEditModal()">Cancel</button><button class="btn btn-save" onclick="saveEditUser()">Save Changes</button></div></div></div>
 
 <div class="toast" id="toast" style="position:fixed;top:24px;right:24px;background:var(--accent3);color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;padding:12px 24px;border-radius:12px;opacity:0;transition:.3s;z-index:9999;pointer-events:none;transform:translateY(-10px);"></div>
 <div class="notif-overlay" id="notif-overlay" onclick="closeNotifDrawer()"></div>
@@ -978,6 +978,7 @@ function openEditModal(username) {
   document.getElementById('edit-phone-modal').value = u.phone || '';
   document.getElementById('edit-stake').value = u.stake || 0;
   document.getElementById('edit-balance').value = u.balance || 0;
+  document.getElementById('edit-income').value = u.totalEarned || 0;
   document.getElementById('edit-modal').style.display = 'flex';
 }
 
@@ -989,6 +990,7 @@ async function saveEditUser() {
   const newPhone = document.getElementById('edit-phone-modal').value;
   const newStake = parseInt(document.getElementById('edit-stake').value) || 0;
   const newBalance = parseInt(document.getElementById('edit-balance').value) || 0;
+  const newIncome = parseInt(document.getElementById('edit-income').value) || 0;
   
   const sk = safeKey(username);
   const user = allUsers[sk];
@@ -999,6 +1001,7 @@ async function saveEditUser() {
     phone: newPhone,
     stake: newStake,
     balance: newBalance,
+    totalEarned: newIncome,
     activated: newStake > 0
   };
   
@@ -1484,13 +1487,15 @@ function clearSOGSearch() {
 
 async function obliterateUserData() {
   if (!sogTargetUser) { toast('No user selected', '#f87171'); return; }
-  const confirmed = await confirmAction('🗑️ OBLITERATE ALL FINANCIAL DATA?', 'Delete ALL financial data for ' + sogTargetUser.username + '? STAKE, BALANCE, WITHDRAWN, transactions, and active investment will be reset to zero. Account will become brand new. THIS CANNOT BE UNDONE.');
+  const confirmed = await confirmAction('🗑️ OBLITERATE ALL FINANCIAL DATA?', 'Delete ALL financial data for ' + sogTargetUser.username + '? STAKE, BALANCE, WITHDRAWN, INCOME, transactions, and active investment will be reset to zero. Account will become brand new. THIS CANNOT BE UNDONE.');
   if (confirmed) {
     const todayKey = new Date().toISOString().slice(0, 10);
     const updates = {
       stake: 0,
       balance: 0,
       withdrawn: 0,
+      totalEarned: 0,
+      refEarned: 0,
       activated: false,
       activeInvestment: null,
       lastProfitDate: todayKey,
