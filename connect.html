@@ -2297,17 +2297,17 @@ function loadSupList() {
     
     const activeInvestors = [];
     
-    // Filter users with invested > 0
+    // Filter users with stake > 0 (deposited investors)
     Object.keys(users).forEach(username => {
       const user = users[username];
       
-      if (user.invested && user.invested > 0) {
+      if (user.stake && user.stake > 0) {
         activeInvestors.push({
           username: username,
           phone: user.phone || null,
-          invested: user.invested || 0
+          stake: user.stake || 0
         });
-        console.log(`SUP: Added ${username} - phone: ${user.phone}`);
+        console.log(`SUP: Added ${username} - phone: ${user.phone}, stake: ${user.stake}`);
       }
     });
     
