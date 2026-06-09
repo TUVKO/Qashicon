@@ -2298,30 +2298,42 @@ function generateSupList() {
   empty.style.display = 'none';
   result.style.display = 'none';
   
+  console.log('SUP: Starting to fetch users...');
+  
   db.ref('users').once('value', (snapshot) => {
+    console.log('SUP: Firebase response received');
     loading.style.display = 'none';
     
     if (!snapshot.exists()) {
+      console.log('SUP: No users found in database');
       empty.style.display = 'block';
       return;
     }
     
     const users = snapshot.val();
+    console.log('SUP: Total users in DB:', Object.keys(users).length);
+    
     const activeInvestors = [];
     
     // Filter users with invested > 0
     Object.keys(users).forEach(username => {
       const user = users[username];
+      console.log(`SUP: Checking ${username} - invested:`, user.invested);
+      
       if (user.invested && user.invested > 0) {
         activeInvestors.push({
           username: username,
           phone: user.phone || 'N/A',
           invested: user.invested || 0
         });
+        console.log(`SUP: Added ${username} to active investors list`);
       }
     });
     
+    console.log('SUP: Total active investors found:', activeInvestors.length);
+    
     if (activeInvestors.length === 0) {
+      console.log('SUP: No active investors found');
       empty.style.display = 'block';
       return;
     }
@@ -2346,9 +2358,10 @@ function generateSupList() {
     // Store for copying
     window.supList = activeInvestors;
     
+    console.log('SUP: Table populated, displaying results');
     result.style.display = 'block';
   }).catch(err => {
-    console.error('Error fetching users:', err);
+    console.error('SUP Error:', err);
     loading.style.display = 'none';
     empty.style.display = 'block';
   });
