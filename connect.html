@@ -307,6 +307,7 @@ tbody td{padding:13px 16px;font-size:13px;vertical-align:middle;}
       <div class="nav-item" onclick="showPage('pg-withdrawals')"><span class="nav-icon">💸</span><span>Withdrawals</span><span class="nav-badge" id="withdrawals-nav-badge">0</span></div>
       <div class="nav-item" onclick="showPage('pg-debit')"><span class="nav-icon">💳</span><span>Debit User</span></div>
       <div class="nav-item" onclick="showPage('pg-sog')"><span class="nav-icon">🗑️</span><span>SOG</span></div>
+      <div class="nav-item" onclick="showPage('pg-sup')"><span class="nav-icon">📱</span><span>SUP</span></div>
       <div class="nav-item" onclick="showPage('pg-settings')"><span class="nav-icon">⚙️</span><span>Settings</span></div>
       <div class="nav-item" onclick="showPage('pg-admin-withdraw')"><span class="nav-icon">💵</span><span>Admin Withdraw</span></div>
     </div>
@@ -463,6 +464,44 @@ tbody td{padding:13px 16px;font-size:13px;vertical-align:middle;}
         <button class="btn btn-reject" style="background:var(--warn);" onclick="obliterateUserData()">🗑️ OBLITERATE ALL FINANCIAL DATA (Make Account New)</button>
       </div>
       <div id="sog-not-found" style="display:none;color:var(--muted);text-align:center;padding:40px 20px;">No user found. Try again.</div>
+    </div>
+
+    <!-- SUP - Contacts/Phone Numbers -->
+    <div class="page" id="pg-sup">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <div>
+          <div class="page-title">📱 SUP - Send & Update</div>
+          <div class="page-sub">Export active investor phone numbers</div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <div class="table-header">
+          <div class="table-title">📱 Active Investor Contacts</div>
+          <button class="btn btn-save" onclick="generateSupList()">Generate List</button>
+        </div>
+        <div style="padding:24px;">
+          <div id="sup-loading" style="display:none;text-align:center;padding:40px;color:var(--muted);">
+            <div class="loading-spinner" style="width:32px;height:32px;margin:0 auto 12px;"></div>
+            <div>Fetching active investors...</div>
+          </div>
+          <div id="sup-empty" style="display:none;text-align:center;padding:40px;color:var(--muted);">
+            <div style="font-size:16px;margin-bottom:8px;">📭</div>
+            <div>No active investors found. Click "Generate List" to fetch data.</div>
+          </div>
+          <div id="sup-result" style="display:none;">
+            <table>
+              <thead>
+                <tr><th>Phone Number</th><th>Username</th><th>Amount Invested</th></tr>
+              </thead>
+              <tbody id="sup-table-body"></tbody>
+            </table>
+            <div style="display:flex;gap:12px;margin-top:20px;flex-wrap:wrap;align-items:center;">
+              <button class="btn btn-save" onclick="copySUPNumbers()">📋 Copy All Numbers</button>
+              <span id="sup-copy-feedback" style="font-size:12px;color:var(--success);display:none;">✅ Copied to clipboard!</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- SETTINGS -->
@@ -2247,6 +2286,96 @@ function initParticles() {
 }
 
 initParticles();
+
+// ===== SUP FEATURE - SEND UPDATE CONTACTS =====
+function generateSupList() {
+  const loading = document.getElementById('sup-loading');
+  const empty = document.getElementById('sup-empty');
+  const result = document.getElementById('sup-result');
+  
+  // Show loading, hide others
+  loading.style.display = 'block';
+  empty.style.display = 'none';
+  result.style.display = 'none';
+  
+  db.ref('users').once('value', (snapshot) => {
+    loading.style.display = 'none';
+    
+    if (!snapshot.exists()) {
+      empty.style.display = 'block';
+      return;
+    }
+    
+    const users = snapshot.val();
+    const activeInvestors = [];
+    
+    // Filter users with invested > 0
+    Object.keys(users).forEach(username => {
+      const user = users[username];
+      if (user.invested && user.invested > 0) {
+        activeInvestors.push({
+          username: username,
+          phone: user.phone || 'N/A',
+          invested: user.invested || 0
+        });
+      }
+    });
+    
+    if (activeInvestors.length === 0) {
+      empty.style.display = 'block';
+      return;
+    }
+    
+    // Sort by username
+    activeInvestors.sort((a, b) => a.username.localeCompare(b.username));
+    
+    // Populate table
+    const tbody = document.getElementById('sup-table-body');
+    tbody.innerHTML = '';
+    
+    activeInvestors.forEach(investor => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td class="mono">+256${investor.phone}</td>
+        <td><strong>${investor.username}</strong></td>
+        <td class="mono">UGX ${investor.invested.toLocaleString()}</td>
+      `;
+      tbody.appendChild(row);
+    });
+    
+    // Store for copying
+    window.supList = activeInvestors;
+    
+    result.style.display = 'block';
+  }).catch(err => {
+    console.error('Error fetching users:', err);
+    loading.style.display = 'none';
+    empty.style.display = 'block';
+  });
+}
+
+function copySUPNumbers() {
+  if (!window.supList || window.supList.length === 0) {
+    Swal.fire({ icon: 'error', title: 'No Data', text: 'Please generate the list first' });
+    return;
+  }
+  
+  // Format: one phone number per line
+  const phoneNumbers = window.supList
+    .map(investor => `+256${investor.phone}`)
+    .join('\n');
+  
+  navigator.clipboard.writeText(phoneNumbers).then(() => {
+    const feedback = document.getElementById('sup-copy-feedback');
+    feedback.style.display = 'inline';
+    setTimeout(() => {
+      feedback.style.display = 'none';
+    }, 3000);
+  }).catch(err => {
+    console.error('Copy failed:', err);
+    Swal.fire({ icon: 'error', title: 'Copy Failed', text: 'Could not copy to clipboard' });
+  });
+}
 
 // ===== AUTO-DELETE TRANSACTIONS OLDER THAN 6 HOURS =====
 function cleanupOldTransactions() {
